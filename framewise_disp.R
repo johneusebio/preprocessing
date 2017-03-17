@@ -22,8 +22,8 @@ if (length(unused_args) > 0) {
   print(paste('WARNING: unused arguments ', unused_args))
 }
 
-PATH <- 'C:/Users/john/Documents/sample_fmri/2357ZL'
-COND <- 'Retrieval'
+# PATH <- 'C:/Users/john/Documents/sample_fmri/2357ZL'
+# COND <- 'Retrieval'
 
 library(ggplot2)
 
