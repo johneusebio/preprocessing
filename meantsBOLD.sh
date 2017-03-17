@@ -26,5 +26,5 @@ for line in $(cat $TMP_DIR/DVARS.txt); do
 	COUNT=$((COUNT + 1))
 done
 
-cp -f $TMP_DIR/DVARS.csv $SUBJ_DIR/MPEs/
+cp -f $TMP_DIR/DVARS.csv $SUBJ_DIR/mot_analysis/
 rm -r $TMP_DIR
