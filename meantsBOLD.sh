@@ -20,9 +20,9 @@ for vol in $(seq 1 1 $file_ls_num); do
 done
 
 COUNT=1
-echo 'deltaTR, DVARS' > $TMP_DIR/DVARS.csv
+echo '"deltaTR", "DVARS"' > $TMP_DIR/DVARS.csv
 for line in $(cat $TMP_DIR/DVARS.txt); do
-	echo TR$(($COUNT + 1))-TR$(($COUNT)), $line >> $TMP_DIR/DVARS.csv
+	echo '"'TR$(($COUNT + 1))-TR$(($COUNT))'"', $line >> $TMP_DIR/DVARS.csv
 	COUNT=$((COUNT + 1))
 done
 
