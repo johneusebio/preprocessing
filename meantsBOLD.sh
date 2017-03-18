@@ -1,11 +1,16 @@
-SUBJ_DIR='/mnt/c/Users/john/Documents/sample_fmri/2357ZL'
-COND='Retrieval'
+# SUBJ_DIR='/mnt/c/Users/john/Documents/sample_fmri/2357ZL'
+# COND='Retrieval'
+
+
+SUBJ_DIR=$1
+COND=$2
+PREPROC=$3
 
 NIFTI_FILE=$SUBJ_DIR/fun/preproc/snlmt_$COND
 
 nvols=$(fslnvols $NIFTI_FILE)
 
-TMP_DIR=$SUBJ_DIR/fun/preproc/.tmp
+TMP_DIR=$SUBJ_DIR/fun/preproc/tmp
 mkdir $TMP_DIR
 fslsplit $NIFTI_FILE $TMP_DIR/$COND'_'
 
@@ -20,11 +25,13 @@ for vol in $(seq 1 1 $file_ls_num); do
 done
 
 COUNT=1
-echo '"deltaTR", "DVARS"' > $TMP_DIR/DVARS.csv
+echo '"deltaTR", "DVARS"' > $TMP_DIR/$COND'_DVARS.csv'
 for line in $(cat $TMP_DIR/DVARS.txt); do
-	echo '"'TR$(($COUNT + 1))-TR$(($COUNT))'"', $line >> $TMP_DIR/DVARS.csv
+	echo '"'TR$(($COUNT + 1))-TR$(($COUNT))'"', $line >> $TMP_DIR/$COND'_DVARS.csv'
 	COUNT=$((COUNT + 1))
 done
 
-cp -f $TMP_DIR/DVARS.csv $SUBJ_DIR/mot_analysis/
+cp -f $TMP_DIR/$COND'_DVARS.csv' $SUBJ_DIR/mot_analysis/
 rm -r $TMP_DIR
+
+Rscript $PREPROC/DVARS_plot.R --PATH=$SUBJ_DIR --COND=$COND

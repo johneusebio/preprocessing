@@ -1,7 +1,11 @@
-SUBJ_DIR='/mnt/c/Users/john/Documents/sample_fmri/2357ZL'
-COND='Retrieval'
+# SUBJ_DIR='/mnt/c/Users/john/Documents/sample_fmri/2357ZL'
+# COND='Retrieval'
 
-TEMPLATE='/usr/share/fsl/5.0/data/standard/MNI152_T1_2mm_brain.nii.gz'
+SUBJ_DIR=$1
+COND=$2
+PREPROC=$3
+
+TEMPLATE='/home/hpc2590/fsl/data/standard/MNI152_T1_2mm_brain.nii.gz'
 
 mkdir $SUBJ_DIR/anatom/mats
 mkdir $SUBJ_DIR/fun/preproc/mats

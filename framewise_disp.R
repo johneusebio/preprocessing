@@ -28,7 +28,8 @@ if (length(unused_args) > 0) {
 library(ggplot2)
 
 output_path <- file.path(PATH, 'mot_analysis')
-dir.create(output_path)
+fig_path    <- file.path(output_path, 'plots')
+dir.create(fig_path, recursive = T, showWarnings = F)
 
 mpe_mm <- read.table( file.path( PATH, 'MPEs', paste0('mm_', COND, '.1D') ) )
 colnames(mpe_mm) <- c('roll', 'pitch', 'yaw', 'mmS', 'mmL', 'mmP')
@@ -65,5 +66,5 @@ plot_FD <-
           plot.title = element_text(hjust = 0.5) )
 
 
-ggsave(plot = plot_FD, filename = file.path(output_path, paste0(COND, '_FD.pdf') ), units = 'cm', width = 16, height = 9)
+ggsave(plot = plot_FD, filename = file.path(fig_path, paste0(COND, '_FD.pdf') ), units = 'cm', width = 16, height = 9)
 write.csv(cFD, file = file.path(output_path, paste0(COND, '_FD.csv')), row.names = F)

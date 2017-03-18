@@ -1,8 +1,11 @@
-PREPROC='/mnt/c/Users/john/OneDrive/2017-2018/preprocessing' # directory of preproc scripts
-
-SUBJ_DIR='/mnt/c/Users/john/Documents/sample_fmri/2357ZL'    # subject directory
-COND='Retrieval'																						 # name of condition
-																																	# NOTE: must use this name for behav & fmri data
+# PREPROC='/mnt/c/Users/john/OneDrive/2017-2018/preprocessing' # directory of preproc scripts
+# SUBJ_DIR='/mnt/c/Users/john/Documents/sample_fmri/2357ZL'
+# COND='Retrieval'																				
+																												
+SUBJ_DIR=$1    # subject directory
+COND=$2   		 # name of condition
+					         # NOTE: must use this name for behav & fmri data
+PREPROC=$3
 
 
 mkdir $SUBJ_DIR/fun/preproc
