@@ -5,7 +5,7 @@ SUBJ_DIR=$1
 COND=$2
 PREPROC=$3
 
-TEMPLATE='/home/hpc2590/fsl/data/standard/MNI152_T1_2mm_brain.nii.gz'
+TEMPLATE=$FSLDIR'/data/standard/MNI152_T1_2mm_brain.nii.gz'
 
 mkdir $SUBJ_DIR/anatom/mats
 mkdir $SUBJ_DIR/fun/preproc/mats

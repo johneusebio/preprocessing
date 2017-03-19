@@ -56,7 +56,7 @@ for (row in 1:nrows) {
 
 cFD <- data.frame(
   TR = c(1:length(cFD)), 
-  FD = cFD
+  FD = abs(cFD)
   )
 
 max_disp.FD    <- c(0.5 * voxel_size * 360 / (2 * pi * head_rad), 0.5 * voxel_size)

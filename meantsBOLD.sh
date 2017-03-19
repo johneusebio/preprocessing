@@ -21,14 +21,16 @@ echo 'Computing differences...'
 for vol in $(seq 1 1 $file_ls_num); do 
 	fslmaths ${file_ls[vol]} -sub ${file_ls[((vol - 1))]} $TMP_DIR/tmp_diff
 	fslmaths $TMP_DIR/tmp_diff -sqr $TMP_DIR/sqr_tmp_diff
-	echo $(fslmeants -i $TMP_DIR/sqr_tmp_diff -m $SUBJ_DIR/anatom/bin_nl_brain_Mprage.nii.gz) >> $TMP_DIR/DVARS.txt
+	spatmean=$(fslmeants -i $TMP_DIR/sqr_tmp_diff -m $SUBJ_DIR/anatom/bin_nl_brain_Mprage.nii.gz) 
+	echo $(echo "sqrt ( $spatmean )" | bc -l) >> $TMP_DIR/DVARS.txt
 done
 
 COUNT=1
 echo '"deltaTR", "DVARS"' > $TMP_DIR/$COND'_DVARS.csv'
 for line in $(cat $TMP_DIR/DVARS.txt); do
-	if [ $COUNT == 1]; then
-		echo '"'TR$(($COUNT + 1))-TR$(($COUNT))'"', $line > $TMP_DIR/$COND'_DVARS.csv'
+	if [ $COUNT == 1 ]; then
+		echo '"TRs"', '"DVARS"' > $TMP_DIR/$COND'_DVARS.csv'
+		echo '"'TR$(($COUNT + 1))-TR$(($COUNT))'"', $line >> $TMP_DIR/$COND'_DVARS.csv'
 	else
 		echo '"'TR$(($COUNT + 1))-TR$(($COUNT))'"', $line >> $TMP_DIR/$COND'_DVARS.csv'
 	fi

@@ -1,5 +1,5 @@
-SUBJ_DIR='/mnt/c/Users/john/Documents/sample_fmri/2357ZL'    # subject directory
-COND='Retrieval'
+# SUBJ_DIR='/mnt/c/Users/john/Documents/sample_fmri/2357ZL'    # subject directory
+# COND='Retrieval'
 
 SUBJ_DIR=$1
 COND=$2

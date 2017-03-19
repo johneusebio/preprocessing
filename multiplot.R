@@ -22,7 +22,7 @@ if (length(unused_args) > 0) {
   print(paste('WARNING: unused arguments ', unused_args))
 }
 
-# PATH <- 'C:/Users/john/Documents/sample_fmri/2357ZL'
+# PATH <- '/mnt/c/Users/john/Documents/sample_fmri/2357ZL'
 # COND <- 'Retrieval'
 
 require(ggplot2  , quietly = T)
@@ -50,14 +50,14 @@ MOVE_TAB <- data.frame(FD = FD[,1], DVARS = c(NA, DVARS[,1]) )
 
 max_disp.scale <- 1
 
-max_disp.FD       <- c(voxel_size * 360 / (2 * pi * head_rad), voxel_size)
+max_disp.FD       <- c(0.5 * voxel_size * 360 / (2 * pi * head_rad), 0.5 * voxel_size)
 max_disp.FD       <- max(max_disp.FD)
 if( max( abs(MOVE_TAB$FD) ) > voxel_size ) {
   max_disp.FD <- max( abs(MOVE_TAB$FD) ) 
 }
 
-max_disp.DVARS <- 100
-if( max( abs(MOVE_TAB$DVARS) ) > max_disp.DVARS ) {
+max_disp.DVARS <- 50
+if( max( abs(MOVE_TAB$DVARS), na.rm = T ) > max_disp.DVARS ) {
   max_disp.DVARS <- max( abs(MOVE_TAB$DVARS) )
 }
 
