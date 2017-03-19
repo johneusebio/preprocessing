@@ -29,17 +29,13 @@ require(ggplot2,   quietly = T)
 require(grid,      quietly = T)
 require(gridExtra, quietly = T)
 
-head_rad <- 50 # distance from center for brain to cortex, in mm
-
+head_rad   <- 50 # distance from center for brain to cortex, in mm
 sys_cmd    <- paste0('3dinfo -adi -adj -adk ', file.path(PATH, 'fun', 'preproc'),  '/snlmt_', COND, '.nii*' )
 
 voxel_size <- system(sys_cmd, intern = T)
 voxel_size <- strsplit(voxel_size, split = '\t')[[1]]
 voxel_size <- as.numeric(voxel_size)
 voxel_size <- min(voxel_size)
-
-max_disp       <- voxel_size * 360 / (2 * pi * head_rad)
-max_disp.scale <- 1
 
 output_path <- file.path(PATH, 'MPEs')
 fig_path    <- file.path(output_path, 'plots')
@@ -51,13 +47,19 @@ colnames(mpe_mm) <- c('roll', 'pitch', 'yaw', 'mmS', 'mmL', 'mmP')
 mpe           <- read.table( file.path( PATH, 'MPEs', paste0(COND, '.1D') ) )
 colnames(mpe) <- c('roll', 'pitch', 'yaw', 'dS', 'dL', 'dP')
 
+max_disp       <- c(voxel_size * 360 / (2 * pi * head_rad), voxel_size)
+max_disp       <- max(max_disp)
+if( max( abs(mpe[, c('roll', 'pitch', 'yaw') ]) ) > max_disp ) {
+  max_disp <- max( abs(mpe[, c('roll', 'pitch', 'yaw') ]) )
+}
+max_disp.scale <- 1
 
 breaks.major <- seq(ceiling(- max_disp.scale * max_disp), floor(max_disp.scale * max_disp), 1)
 breaks.minor <- seq(floor(- max_disp.scale * max_disp) + 0.5, floor(max_disp.scale * max_disp) + 0.5, 0.5)
 breaks.minor <- breaks.minor[-which(breaks.minor %% 1 == 0)]
 
 breaks.major <- sort(c(breaks.minor, breaks.major))
-  
+
 plot.mpe.dist <-
   ggplot(data = mpe) +
   geom_hline(aes(yintercept = 0), colour = 'grey40', linetype = 1, size = 0.4, alpha = 0.5) +
@@ -77,8 +79,8 @@ plot.mpe.dist <-
   xlab('time (TRs)') +
   ylab('Displacement (mm)') + 
   theme_minimal() +
-  theme(axis.line.x      = element_line(size = 0.5, colour = "black"),
-        axis.line.y      = element_line(size = 0.5, colour = "black"),
+  theme(axis.line.x      = element_line(size = 0.5, colour = 'black'),
+        axis.line.y      = element_line(size = 0.5, colour = 'black'),
         panel.grid.major = element_line(size = 0, colour = 'white'),
         panel.grid.minor = element_line(size = 0, colour = 'white'), 
         plot.title       = element_text(hjust = 0.5),
@@ -104,8 +106,8 @@ plot.mpe.rot <-
   xlab('time (TRs)') +
   ylab('Rotation (CCW deg)') +
   theme_minimal() +
-  theme(axis.line.x      = element_line(size = 0.5, colour = "black"),
-        axis.line.y      = element_line(size = 0.5, colour = "black"),
+  theme(axis.line.x      = element_line(size = 0.5, colour = 'black'),
+        axis.line.y      = element_line(size = 0.5, colour = 'black'),
         panel.grid.major = element_line(size = 0, colour = 'white'),
         panel.grid.minor = element_line(size = 0, colour = 'white'))
 

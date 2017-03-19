@@ -22,7 +22,7 @@ if (length(unused_args) > 0) {
   print(paste('WARNING: unused arguments ', unused_args))
 }
 
-# PATH <- 'C:/Users/john/Documents/sample_fmri/2357ZL'
+# PATH <- '/mnt/c/Users/john/Documents/sample_fmri/2357ZL'
 # COND <- 'Retrieval'
 
 library(ggplot2)
@@ -30,6 +30,14 @@ library(ggplot2)
 output_path <- file.path(PATH, 'mot_analysis')
 fig_path    <- file.path(output_path, 'plots')
 dir.create(fig_path, recursive = T, showWarnings = F)
+
+head_rad   <- 50 # distance from center for brain to cortex, in mm
+sys_cmd    <- paste0('3dinfo -adi -adj -adk ', file.path(PATH, 'fun', 'preproc'),  '/snlmt_', COND, '.nii*' )
+
+voxel_size <- system(sys_cmd, intern = T)
+voxel_size <- strsplit(voxel_size, split = '\t')[[1]]
+voxel_size <- as.numeric(voxel_size)
+voxel_size <- min(voxel_size)
 
 mpe_mm <- read.table( file.path( PATH, 'MPEs', paste0('mm_', COND, '.1D') ) )
 colnames(mpe_mm) <- c('roll', 'pitch', 'yaw', 'mmS', 'mmL', 'mmP')
@@ -51,20 +59,26 @@ cFD <- data.frame(
   FD = cFD
   )
 
-plot_FD <- 
-  ggplot(mapping = aes(x = cFD$TR, y = cFD$FD)) + 
-    geom_line(colour = 'dodgerblue2', size = 0.75) +
-    scale_x_continuous(limits = c( 0, dim(cFD)[1] ), expand = c(0, 0)) +
-    ggtitle('Framewise Displacement (FD) Across Time') +
-    xlab('time (TRs)') +
-    ylab('FD (mm)') + 
-    theme_minimal() +
-    theme(axis.line.x = element_line(size = 0.5, colour = "black"),
-          axis.line.y = element_line(size = 0.5, colour = "black"),
-          panel.grid.major = element_line(size = 0, colour = 'white'),
-          panel.grid.minor = element_line(size = 0, colour = 'white'), 
-          plot.title = element_text(hjust = 0.5) )
+max_disp.FD    <- c(0.5 * voxel_size * 360 / (2 * pi * head_rad), 0.5 * voxel_size)
+max_disp.FD    <- max( max_disp.FD )
+if( max( abs(cFD$FD) ) > max_disp.FD ) {
+  max_disp.FD  <- max( max( abs(cFD$FD) ) )
+}
+max_disp.scale <- 1
 
+plot_FD <- ggplot(mapping = aes(x = cFD$TR, y = cFD$FD)) + 
+  geom_line(colour = 'dodgerblue2', size = 0.75) +
+  scale_x_continuous(limits = c( 0, dim(cFD)[1] )) +
+  scale_y_continuous( limits = c(-max_disp.FD, max_disp.FD)) + 
+  ggtitle('Framewise Displacement (FD) Across Time') +
+  xlab('time (TRs)') +
+  ylab('FD (mm)') + 
+  theme_minimal() +
+  theme(axis.line.x = element_line(size = 0.5, colour = 'black'),
+  axis.line.y       = element_line(size = 0.5, colour = 'black'),
+  panel.grid.major  = element_line(size = 0, colour = 'white'),
+  panel.grid.minor  = element_line(size = 0, colour = 'white'),
+  plot.title        = element_text(hjust = 0.5))
 
-ggsave(plot = plot_FD, filename = file.path(fig_path, paste0(COND, '_FD.pdf') ), units = 'cm', width = 16, height = 9)
 write.csv(cFD, file = file.path(output_path, paste0(COND, '_FD.csv')), row.names = F)
+ggsave(plot = plot_FD, filename = file.path(fig_path, paste0(COND, '_FD.pdf') ), units = 'cm', width = 16, height = 9)

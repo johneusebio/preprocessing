@@ -23,12 +23,12 @@ NUM_CORES=$(grep -c ^processor /proc/cpuinfo)
 	                                                                 \
 	-fitts $SUBJ_DIR/fun/preproc/fmt_$COND                                                 \
 	-errts $SUBJ_DIR/fun/preproc/emt_$COND                                                 \
-  -tout                                                            # \
+  # -tout                                                            \
   # -x1D $COND.xmat.1D                                               \
 	# -xjpeg $COND.jpg                                                 \
   # -jobs $NUM_CORES
 
-3dAFNItoNIFTI -prefix $SUBJ_DIR/fun/preproc/emt_$COND $SUBJ_DIR/fun/preproc/emt_$COND+orig.HEAD
-3dAFNItoNIFTI -prefix $SUBJ_DIR/fun/preproc/fmt_$COND $SUBJ_DIR/fun/preproc/fmt_$COND+orig.HEAD
-rm $SUBJ_DIR/fun/preproc/emt_$COND+orig.*
-rm $SUBJ_DIR/fun/preproc/fmt_$COND+orig.*
+3dAFNItoNIFTI -prefix $SUBJ_DIR/fun/preproc/emt_$COND $SUBJ_DIR/fun/preproc/emt_$COND+*.HEAD
+3dAFNItoNIFTI -prefix $SUBJ_DIR/fun/preproc/fmt_$COND $SUBJ_DIR/fun/preproc/fmt_$COND+*.HEAD
+rm $SUBJ_DIR/fun/preproc/emt_$COND+*.*
+rm $SUBJ_DIR/fun/preproc/fmt_$COND+*.*

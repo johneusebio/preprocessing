@@ -27,7 +27,11 @@ done
 COUNT=1
 echo '"deltaTR", "DVARS"' > $TMP_DIR/$COND'_DVARS.csv'
 for line in $(cat $TMP_DIR/DVARS.txt); do
-	echo '"'TR$(($COUNT + 1))-TR$(($COUNT))'"', $line >> $TMP_DIR/$COND'_DVARS.csv'
+	if [ $COUNT == 1]; then
+		echo '"'TR$(($COUNT + 1))-TR$(($COUNT))'"', $line > $TMP_DIR/$COND'_DVARS.csv'
+	else
+		echo '"'TR$(($COUNT + 1))-TR$(($COUNT))'"', $line >> $TMP_DIR/$COND'_DVARS.csv'
+	fi
 	COUNT=$((COUNT + 1))
 done
 
