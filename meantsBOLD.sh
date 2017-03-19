@@ -38,6 +38,6 @@ for line in $(cat $TMP_DIR/DVARS.txt); do
 done
 
 cp -f $TMP_DIR/$COND'_DVARS.csv' $SUBJ_DIR/mot_analysis/
-rm -r $TMP_DIR
+# rm -r $TMP_DIR
 
 Rscript $PREPROC/DVARS_plot.R --PATH=$SUBJ_DIR --COND=$COND

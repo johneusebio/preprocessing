@@ -45,11 +45,11 @@ DVARS <- read.csv(DVARS, header = T)
 FD    <- read.csv(FD,    header = T)
 
 #### Test block ####
-FD    <- read.csv('C:/Users/john/Documents/sample_fmri/2357ZL/mot_analysis/Retrieval_FD.csv'   , header = T)$FD
-DVARS <- read.csv('C:/Users/john/Documents/sample_fmri/2357ZL/mot_analysis/Retrieval_DVARS.csv', header = T)$DVARS
-nifti.crit <- 'UNION'
-thr.DVARS <- 25
-thr.FD    <- 0.1
+# FD    <- read.csv('C:/Users/john/Documents/sample_fmri/2357ZL/mot_analysis/Retrieval_FD.csv'   , header = T)$FD
+# DVARS <- read.csv('C:/Users/john/Documents/sample_fmri/2357ZL/mot_analysis/Retrieval_DVARS.csv', header = T)$DVARS
+# nifti.crit <- 'UNION'
+# thr.DVARS <- 25
+# thr.FD    <- 0.1
 
 #### main body ####
 DVARS <- c(0, DVARS)
@@ -99,6 +99,33 @@ for (mark in 1:length(nifti.mark)) {
   }
 }
 
+#### interpolation ####
+
+for (nifti in nifti.interpol) {
+  cmd.interpol.sum <- paste0('fslmaths ', NIFTI_LS[nifti - 1], ' -add ', NIFTI_LS[nifti - 1], ' ', NIFTI_LS[nifti])
+  cmd.interpol.avg <- paste0('fslmaths ', NIFTI_LS[nifti], ' -div 2', NIFTI_LS[nifti])
+  system(cmd.interpol.sum, wait = T)
+  system(cmd.interpol.avg, wait = T)
+}
+
+#### remove outlier TRs ####
+
+for (nifti in nifti.rm) {
+  file.remove(NIFTI_LS[nifti])
+}
+
+#### merge remaining TRs ####
+
+cmd.tr    <- paste0('3dinfo -tr ', PATH, '/fun/', COND, '.nii*')
+TR        <- system(cmd.tr, intern = T, wait = T)
+
+cmd.merge <- paste0('fslmerge -t ', 
+                    paste0(PATH, '/fun/preproc/scrub_snlmt_', COND), 
+                    ' ', 
+                    paste0(PATH, '/fun/preproc/tmp/*', COND, '*'),
+                    ' ', 
+                    TR)
 
 
-
+system(cmd.merge, wait = T)
+system(paste0('rm -r ', PATH, '/fun/preproc/tmp'))
