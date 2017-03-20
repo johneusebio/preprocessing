@@ -36,12 +36,14 @@ dir.create(fig_path, recursive = T, showWarnings = F)
 #### Main Body ####
 
 head_rad   <- 50 # distance from center for brain to cortex, in mm
-sys_cmd    <- paste0('3dinfo -adi -adj -adk ', file.path(PATH, 'fun', 'preproc'),  '/snlmt_', COND, '.nii.gz' )
+sys_cmd    <- paste0('3dinfo -adi -adj -adk ', file.path(PATH, 'fun'), COND, '.nii*' )
 
 voxel_size <- system(sys_cmd, intern = T)
+print(paste0('voxel sizes are', voxel_size))
 voxel_size <- strsplit(voxel_size, split = '\t')[[1]]
 voxel_size <- as.numeric(voxel_size)
 voxel_size <- min(voxel_size)
+print(paste0('min. voxel size is', voxel_size))
 
 FD    <- read.csv( file.path(PATH, 'mot_analysis', paste0(COND, '_FD.csv'   ) ), header = T, row.names = 1)
 DVARS <- read.csv( file.path(PATH, 'mot_analysis', paste0(COND, '_DVARS.csv') ), header = T, row.names = 1)

@@ -35,10 +35,15 @@ if (length(unused_args) > 0) {
 }
 
 #### data organization ####
+print('scrubbing the time series....')
 NIFTI_PATH <- file.path(PATH, 'fun', 'preproc', 'tmp')
-NIFTI_LS   <- list.files(NIFTI_PATH, pattern = paste0(COND, '*.nii'), full.names = T)
+NIFTI_LS   <- list.files(NIFTI_PATH, pattern = paste0(COND, '*.nii*'), full.names = T)
+print(NIFTI_LS)
+print(paste0('number of NIFTI files is ', length(NIFTI_LS) ) )
 
+print('line 41, scrubbing')
 DVARS <- file.path(PATH, 'mot_analysis', paste0(COND, '_DVARS.csv') )
+print('line 42, scrubbing')
 FD    <- file.path(PATH, 'mot_analysis', paste0(COND, '_FD.csv'   ) )
 
 DVARS <- read.csv(DVARS, header = T)
@@ -122,10 +127,14 @@ TR        <- system(cmd.tr, intern = T, wait = T)
 cmd.merge <- paste0('fslmerge -t ', 
                     paste0(PATH, '/fun/preproc/scrub_snlmt_', COND), 
                     ' ', 
-                    paste0(PATH, '/fun/preproc/tmp/*', COND, '*'),
+                    paste0(PATH, '/fun/preproc/tmp/*', COND, '.nii*'),
                     ' ', 
                     TR)
 
 
 system(cmd.merge, wait = T)
-system(paste0('rm -r ', PATH, '/fun/preproc/tmp'))
+
+if ( length(NIFTI_LS) > 0 ) {
+  system(paste0('rm -r ', PATH, '/fun/preproc/tmp'))
+}
+

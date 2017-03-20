@@ -21,4 +21,4 @@ Rscript $PREPROC/framewise_disp.R --PATH=$SUBJ_DIR --COND=$COND
 bash $PREPROC/meantsBOLD.sh $SUBJ_DIR $COND $PREPROC
 Rscript $PREPROC/multiplot.R --PATH=$SUBJ_DIR --COND=$COND
 Rscript $PREPROC/mot_summ.R --PATH=$SUBJ_DIR --COND=$COND
-Rscript $PREPROC/scrbbing.R --PATH=$SUBJ_DIR --COND=$COND --FD=$FD --DVARS=$DVARS --RM=$RM
+Rscript $PREPROC/scrubbing.R --PATH=$SUBJ_DIR --COND=$COND --FD=$FD --DVARS=$DVARS --RM=$RM

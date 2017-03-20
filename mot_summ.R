@@ -30,7 +30,7 @@ require(grid,      quietly = T)
 require(gridExtra, quietly = T)
 
 head_rad   <- 50 # distance from center for brain to cortex, in mm
-sys_cmd    <- paste0('3dinfo -adi -adj -adk ', file.path(PATH, 'fun', 'preproc'),  '/snlmt_', COND, '.nii*' )
+sys_cmd    <- paste0('3dinfo -adi -adj -adk ', file.path(PATH, 'fun'),  '/', COND, '.nii*' )
 
 voxel_size <- system(sys_cmd, intern = T)
 voxel_size <- strsplit(voxel_size, split = '\t')[[1]]
