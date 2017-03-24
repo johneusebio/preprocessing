@@ -21,7 +21,7 @@ echo 'Computing differences...'
 for vol in $(seq 1 1 $file_ls_num); do 
 	fslmaths ${file_ls[vol]} -sub ${file_ls[((vol - 1))]} $TMP_DIR/tmp_diff
 	fslmaths $TMP_DIR/tmp_diff -sqr $TMP_DIR/sqr_tmp_diff
-	spatmean=$(fslmeants -i $TMP_DIR/sqr_tmp_diff -m $SUBJ_DIR/anatom/bin_nl_brain_Mprage.nii.gz) 
+	spatmean=$(fslmeants -i $TMP_DIR/sqr_tmp_diff #-m $SUBJ_DIR/anatom/bin_nl_brain_Mprage.nii.gz) 
 	echo $(echo "sqrt ( $spatmean )" | bc -l) >> $TMP_DIR/DVARS.txt
 done
 
