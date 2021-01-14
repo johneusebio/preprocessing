@@ -4,17 +4,11 @@ unused_args <- NULL
 for (arg in args) {
   arg <- strsplit(arg, split = '=')[[1]]
   if (arg[1] == '--PATH') {
-    
     PATH <- arg[2]
-    
   } else if (arg[1] == '--COND') {
-    
     COND <- arg[2]
-    
   } else {
-    
     unused_args <- c(unused_args, paste0(arg[1], '=', arg[2]))
-    
   }
 }
 
@@ -43,7 +37,7 @@ output_path <- file.path(PATH, 'MPEs')
 fig_path    <- file.path(output_path, 'plots')
 dir.create(fig_path, recursive = T, showWarnings = F)
 
-mpe_mm           <- read.table( file.path( PATH, 'MPEs', paste0('mm_', COND, '.1D') ) )
+mpe_mm <- read.table(file.path( PATH, 'MPEs', paste0('mm_', COND, '.1D')))
 colnames(mpe_mm) <- c('roll', 'pitch', 'yaw', 'mmS', 'mmL', 'mmP')
 
 mpe           <- read.table( file.path( PATH, 'MPEs', paste0(COND, '.1D') ) )
@@ -84,7 +78,7 @@ plot.mpe.dist <-
   theme(axis.line.x      = element_line(size = 0.5, colour = 'black'),
         axis.line.y      = element_line(size = 0.5, colour = 'black'),
         panel.grid.major = element_line(size = 0, colour = 'white'),
-        panel.grid.minor = element_line(size = 0, colour = 'white'), 
+        panel.grid.minor = element_line(size = 0, colour = 'white'),
         plot.title       = element_text(hjust = 0.5),
         axis.title.x     = element_blank(),
         axis.text.x      = element_blank(),

@@ -3,14 +3,19 @@ unused_args <- NULL
 
 for (arg in args) {
   arg <- strsplit(arg, split = '=')[[1]]
-  if (arg[1] == '--PATH') {
+  
+  if (arg[1] == '--OUT_DIR') {
     
-    PATH <- arg[2]
+    OUT_DIR <- arg[2]
     
-  } else if (arg[1] == '--COND') {
-    
-    COND <- arg[2]
-    
+  } else if (arg[1] == "--MPE_MM") {
+
+    MPE_MM <- arg[2]
+
+  } else if (arg[1] == "--VOXEL_DIM") {
+
+    VOXEL_DIM <- arg[2]
+
   } else {
     
     unused_args <- c(unused_args, paste0(arg[1], '=', arg[2]))
@@ -22,24 +27,15 @@ if (length(unused_args) > 0) {
   print(paste('WARNING: unused arguments ', unused_args))
 }
 
-# PATH <- '/mnt/c/Users/john/Documents/sample_fmri/2357ZL'
-# COND <- 'Retrieval'
-
 library(ggplot2)
 
-output_path <- file.path(PATH, 'mot_analysis')
-fig_path    <- file.path(output_path, 'plots')
-dir.create(fig_path, recursive = T, showWarnings = F)
-
 head_rad   <- 50 # distance from center for brain to cortex, in mm
-sys_cmd    <- paste0('3dinfo -adi -adj -adk ', file.path(PATH, 'fun', 'preproc'),  '/snlmt_', COND, '.nii*' )
 
-voxel_size <- system(sys_cmd, intern = T)
-voxel_size <- strsplit(voxel_size, split = '\t')[[1]]
+voxel_size <- strsplit(VOXEL_DIM, split = '\\s+')[[1]]
 voxel_size <- as.numeric(voxel_size)
 voxel_size <- min(voxel_size)
 
-mpe_mm <- read.table( file.path( PATH, 'MPEs', paste0('mm_', COND, '.1D') ) )
+mpe_mm <- read.table(MPE_MM)
 colnames(mpe_mm) <- c('roll', 'pitch', 'yaw', 'mmS', 'mmL', 'mmP')
 
 nrows <- dim(mpe_mm)[1]
@@ -60,7 +56,7 @@ cFD <- data.frame(
   )
 
 max_disp.FD    <- c(0.5 * voxel_size * 360 / (2 * pi * head_rad), 0.5 * voxel_size)
-max_disp.FD    <- max( max_disp.FD )
+max_disp.FD    <- max(voxel_size)
 if( max( abs(cFD$FD) ) > max_disp.FD ) {
   max_disp.FD  <- max( max( abs(cFD$FD) ) )
 }
@@ -80,5 +76,5 @@ plot_FD <- ggplot(mapping = aes(x = cFD$TR, y = cFD$FD)) +
   panel.grid.minor  = element_line(size = 0, colour = 'white'),
   plot.title        = element_text(hjust = 0.5))
 
-write.csv(cFD, file = file.path(output_path, paste0(COND, '_FD.csv')), row.names = F)
-ggsave(plot = plot_FD, filename = file.path(fig_path, paste0(COND, '_FD.pdf') ), units = 'cm', width = 16, height = 9)
+write.csv(cFD, file = file.path(OUT_DIR, 'motion_FD.csv'), row.names = F)
+ggsave(plot = plot_FD, filename = file.path(OUT_DIR, 'motion_FD.pdf'), units = 'cm', width = 16, height = 9)
