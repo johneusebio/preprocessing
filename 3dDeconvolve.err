@@ -1,1 +1,3 @@
-** FATAL ERROR: Can't open dataset '/mnt/d/Downloads/ds000031-download/sub-01/ses-003/out/func/s_nl_m_t_func'
+*+ WARNING: Input polort=1; Longest run=537.6 s; Recommended minimum polort=4
+** ERROR: output dataset name 'Decon' conflicts with existing file
+** ERROR: dataset NOT written to disk!
