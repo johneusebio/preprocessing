@@ -1,3 +1,5 @@
-*+ WARNING: Input polort=1; Longest run=537.6 s; Recommended minimum polort=4
+*+ WARNING: Input polort=2; Longest run=537.6 s; Recommended minimum polort=4
 ** ERROR: output dataset name 'Decon' conflicts with existing file
 ** ERROR: dataset NOT written to disk!
+*+ WARNING: Filename conflict: changing '/mnt/d/Downloads/ds000031-download/sub-01/ses-003/out/func/fitts.nii.gz' to 'fitts_AA1.nii.gz'
+*+ WARNING: Filename conflict: changing '/mnt/d/Downloads/ds000031-download/sub-01/ses-003/out/func/errts.nii.gz' to 'errts_AA1.nii.gz'
