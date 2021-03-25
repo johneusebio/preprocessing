@@ -1,5 +1,4 @@
-# 3dDeconvolve -input /mnt/d/Downloads/ds000031-download/sub-01/ses-003/out/func/nl_m_t_func.nii.gz -ortvec /mnt/d/Downloads/ds000031-download/sub-01/ses-003/out/motion/1d_t_func.1D motion -polort 2 -fitts /mnt/d/Downloads/ds000031-download/sub-01/ses-003/out/func/fitts.nii.gz -errts /mnt/d/Downloads/ds000031-download/sub-01/ses-003/out/func/errts.nii.gz
+# 3dDeconvolve -input /mnt/d/Downloads/ds000031-download/sub-01/ses-003/out/func/gsr_nl_m_t_func.nii.gz -ortvec /mnt/d/Downloads/ds000031-download/sub-01/ses-003/out/motion/1d_t_func.1D motreg -polort 1 -errts /mnt/d/Downloads/ds000031-download/sub-01/ses-003/out/func/motreg_gsr_nl_m_t_func.nii.gz
 
-3dREMLfit -matrix Decon.xmat.1D -input /mnt/d/Downloads/ds000031-download/sub-01/ses-003/out/func/nl_m_t_func.nii.gz \
- -Rbuck Decon_REML -Rvar Decon_REMLvar -Rfitts /mnt/d/Downloads/ds000031-download/sub-01/ses-003/out/func/fitts_REML \
- -Rerrts /mnt/d/Downloads/ds000031-download/sub-01/ses-003/out/func/errts_REML -verb $*
+3dREMLfit -matrix Decon.xmat.1D -input /mnt/d/Downloads/ds000031-download/sub-01/ses-003/out/func/gsr_nl_m_t_func.nii.gz \
+ -Rbuck Decon_REML -Rvar Decon_REMLvar -Rerrts /mnt/d/Downloads/ds000031-download/sub-01/ses-003/out/func/motreg_gsr_nl_m_t_func_REML -verb $*
