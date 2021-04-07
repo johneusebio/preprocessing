@@ -1,3 +1,4 @@
-*+ WARNING: Input polort=1; Longest run=537.6 s; Recommended minimum polort=4
+*+ WARNING: Input polort=3; Longest run=537.6 s; Recommended minimum polort=4
 ** ERROR: output dataset name 'Decon' conflicts with existing file
 ** ERROR: dataset NOT written to disk!
+*+ WARNING: Filename conflict: changing '/mnt/d/Downloads/ds000031-download/sub-01/ses-003/out/func/nuis_nl_m_t_func.nii.gz' to 'nuis_nl_m_t_func_AA1.nii.gz'
