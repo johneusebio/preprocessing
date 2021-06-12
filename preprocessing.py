@@ -662,4 +662,8 @@ def wrapper_lvl1(input, config):
 
             pipe_steps["SCRUB"] = {"anat":pipe_steps[step]["anat"], "func":scrubbed_nifti, "scrub_outliers":scrub_outliers, "fd":fd_outliers, "dvars":dvar_outliers, "method":config["SCRUB"]}
 
+<<<<<<< HEAD
     return 
+=======
+    return 
+>>>>>>> ad2304b5ab084de9705cd872e84542cd5d008483
