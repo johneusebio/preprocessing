@@ -1,3 +1,2 @@
-*+ WARNING: Input polort=3; Longest run=537.6 s; Recommended minimum polort=4
 ** ERROR: output dataset name 'Decon' conflicts with existing file
 ** ERROR: dataset NOT written to disk!
