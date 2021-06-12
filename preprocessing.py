@@ -29,11 +29,9 @@ step_order={
     "SLICETIME" :2,
     "MOTCOR"    :3,
     "NORM"      :4,
-    "GSR"       :5,
-    "MOTREG"    :6,
-    "NUISANCE"  :7,
-    "SCRUB"     :8,
-    "SMOOTH"    :9
+    "NUISANCE"  :5,
+    "SCRUB"     :6,
+    "SMOOTH"    :7
 }
 
 # Support Functions
