@@ -245,9 +245,9 @@ def slicetime(img, out_dir):
 
     return(tshift_path)
 
-def motcor(img, out_dir):
-    motcor_path =os.path.join(out_dir, "func", "m_"+os.path.basename(img))
-    _1dfile_path=os.path.join(out_dir, "motion", "1d_"+rm_ext(os.path.basename(img))+".1D")
+def motcor(img, func_dir, motion_dir):
+    motcor_path =os.path.join(func_dir, "m_"+os.path.basename(img))
+    _1dfile_path=os.path.join(motion_dir, "motion", "1d_"+rm_ext(os.path.basename(img))+".1D")
 
     command="3dvolreg -base 0 -prefix {} -1Dfile {} {}".format(motcor_path, _1dfile_path, img)
     os.system(command)
@@ -255,42 +255,42 @@ def motcor(img, out_dir):
     return(motcor_path, _1dfile_path)
     
 # new spatial normalization
-def spatnorm(f_img, a_img, template, out_dir):
+def spatnorm(f_img, a_img, template, func_dir, anat_dir, norm_dir):
     # lin warp func to struct
     print("       + Linear-warping functional to structural...")
-    l_func_omat=os.path.join(out_dir, "spat_norm", "func2str.mat")
+    l_func_omat=os.path.join(norm_dir, "func2str.mat")
     command="flirt -ref {} -in {} -omat {} -dof 6".format(a_img, f_img, l_func_omat)
     os.system(command)
     
     # lin warp struct to template
     print("       + Linear-warping structural to standard template...")
-    l_anat_img =os.path.join(out_dir, "anat", "l_" + os.path.basename(a_img))
-    l_anat_omat=os.path.join(out_dir, "spat_norm", "aff_str2std.mat")
+    l_anat_img =os.path.join(anat_dir, "l_" + os.path.basename(a_img))
+    l_anat_omat=os.path.join(norm_dir, "aff_str2std.mat")
     command="flirt -ref {} -in {} -omat {} -out {}".format(template, a_img, l_anat_omat, l_anat_img)
     os.system(command)
     
     # non-lin warp struct to template
     print("       + Non-linear-warping structural to standard template...")
-    nl_anat_img  =os.path.join(out_dir, "anat", "n" + os.path.basename(l_anat_img))
-    cout_anat_img=os.path.join(out_dir, "anat", "cout_" + os.path.basename(nl_anat_img))
+    nl_anat_img  =os.path.join(anat_dir, "n" + os.path.basename(l_anat_img))
+    cout_anat_img=os.path.join(anat_dir, "cout_" + os.path.basename(nl_anat_img))
     command="fnirt --ref={} --in={} --aff={} --iout={} --cout={} --subsamp=2,2,2,1".format(template, a_img, l_anat_omat, nl_anat_img, cout_anat_img)
     os.system(command)
     
     # make binary mask from non-lin warped image
     print("       + Creating binary mask from non-linearly warped image...")
-    bin_nl_anat_img=os.path.join(out_dir, "anat", "bin_" + os.path.basename(nl_anat_img))
+    bin_nl_anat_img=os.path.join(anat_dir, "bin_" + os.path.basename(nl_anat_img))
     command="fslmaths {} -bin {}".format(nl_anat_img, bin_nl_anat_img)
     os.system(command)
     
     # apply std warp to func data
     print("       + Applying standardized warp to functional data...")
-    nl_func_img=os.path.join(out_dir, "func", "nl_"+os.path.basename(f_img))
+    nl_func_img=os.path.join(func_dir, "nl_"+os.path.basename(f_img))
     command="applywarp --ref={} --in={} --out={} --warp={} --premat={}".format(template, f_img, nl_func_img, cout_anat_img, l_func_omat)
     os.system(command)
 
     # create tempalte mask
     print("       + Creating binary template mask...")
-    mask_path=os.path.join(out_dir, "anat", "mask_" + os.path.basename(template))
+    mask_path=os.path.join(anat_dir, "mask_" + os.path.basename(template))
     command="fslmaths {} -bin {}".format(template, mask_path)
     os.system(command)
 
@@ -359,7 +359,7 @@ def nuis_reg(img, _1d, out_dir, pref="nuis", poly="1"):
 
 def file_len(fname):
     with open(fname) as f:
-        for i, l in enumerate(f):
+        for i, _ in enumerate(f):
             pass
     return i + 1
 
