@@ -1,12 +1,13 @@
 import os
 import gzip
 import shutil
+import pickle
 import decimal
 import pathlib
-import operator
 import numpy as np
 import pandas as pd
 import nibabel as nib
+import preproc_obj as ppo
 from time import sleep
 
 # Config Defaults
@@ -147,14 +148,6 @@ def interpret_config(filepath):
     config_dict = check_defaults(config_dict, default_config)
     return(config_dict)
 
-def afni2nifti(filepath, rm_orig=True):    
-    nii_filepath=os.path.join(os.path.dirname(filepath), rm_ext(filepath))+".nii"
-    os.system("3dAFNItoNIFTI -prefix {} {}".format(nii_filepath, filepath+"*.HEAD"))
-    if rm_orig:
-        os.system("rm {}*.HEAD".format(filepath))
-        os.system("rm {}*.BRIK".format(filepath))
-    return(nii_filepath)
-
 def getTR(filepath):    
     img = nib.load(filepath)
     tr  = img.header.get_zooms()[3]
@@ -181,36 +174,6 @@ def gauss_mm2sigma(mm):
 
 def which(list, x=True):
     return [iter for iter, elem in enumerate(list) if elem == x]
-
-def gzip_file(filename, rm_orig=True):
-    with open(filename, 'rb') as f_in:
-        with gzip.open(filename+'.gz', 'wb') as f_out:
-            shutil.copyfileobj(f_in, f_out)
-        if rm_orig:
-            os.remove(filename)
-    return(filename+'.gz')
-
-def get_key(val, my_dict):
-    for key, value in my_dict.items():
-         if val == value:
-             return key
-
-def get_step(my_dict, ref_dict, which="prev", ignore=["BASELINE"], give="key"):
-    if ignore is None:
-        ignore=[]
-    if which == "first":
-        target=min
-    elif which == "prev":
-        target=max
-    my_keys = list(my_dict.keys())
-    for ig in ignore:
-        my_keys.remove(ig)
-
-    key_val = [ref_dict[key] for key in my_keys]
-    if give=="key":
-        return get_key(target(key_val), ref_dict)
-    elif give=="value":
-        return target(key_val)
 
 def cp_rename(filepath, newpath):
     os.system("cp {} {}".format(filepath, newpath))
@@ -518,10 +481,10 @@ def scrubbing(nifti, outliers, out_dir, interpolate=False):
     # TODO: move bellow to a new function
     new_img = nib.Nifti1Image(mat, img.affine, header=img.header)
     print("       + Saving scrubbed timeseries...")
-    scrub_path=os.path.join(out_dir, "scrub_"+rm_ext(os.path.basename(nifti))+".nii")
+    scrub_path=os.path.join(out_dir, "scrub_"+rm_ext(os.path.basename(nifti))+".nii.gz")
     nib.save(new_img, scrub_path)
     
-    return(gzip_file(scrub_path))
+    return(scrub_path)
 
 # Wrappers
 
@@ -531,133 +494,12 @@ def wrapper_lvl2(input_file, config_file):
     nrow   = len(input.index)
     
     for row in range(nrow):
-        wrapper_lvl1(input.loc[row,:], config)
+        subj_pp = ppo.Preproc_subj(input.loc[row,:], config, step_order)
+        
+        with open(os.path.join(subj_pp.out, "steps.p"), "wb") as fp:
+            pickle.dump(subj_pp.steps, fp, protocol=pickle.HIGHEST_PROTOCOL)
+        with open(os.path.join(subj_pp.out, "config.p"), "wb") as fp:
+            pickle.dump(subj_pp.config, fp, protocol=pickle.HIGHEST_PROTOCOL)
         print("")
-    return(input, config)
-
-def wrapper_lvl1(input, config):
-    
-    # TODO: Fix this mess. Try to move things over to an object.
-    create_dirstruct(input["OUTPUT"])
-
-    # logging the print statements
-    # olog = os.path.join(input["OUTPUT"], "stdout.log")
-    # open(olog, "w").close()
-    # sys.stdout = open(olog, "w")
-
-    # copy files to new locations
-    cur_func=cp_rename(input["FUNC"], os.path.join(input["OUTPUT"], "func", "func"   + get_ext(input["FUNC"])))
-    cur_anat=cp_rename(input["ANAT"], os.path.join(input["OUTPUT"], "anat", "MPRage" + get_ext(input["FUNC"])))
-
-    # create empty dictionary
-    pipe_steps={}
-
-    # add voxel size
-    voxel_sz=voxel_size(cur_func, excl_time=False)
-
-    # sort step keys by value
-    sorted_steps = sorted(step_order.items(), key=operator.itemgetter(1))
-
-    for step_key in sorted_steps:
-        step_key = step_key[0]
-
-        # add baseline
-        if step_key=="BASELINE":
-            pipe_steps={"BASELINE":{"func":cur_func, "anat":cur_anat, "voxel_size":voxel_sz}}
         
-        elif step_key=="SKULLSTRIP" and config["SKULLSTRIP"]=="1": 
-            # will always run on the baseline
-            print("SKULL STRIPPING")
-            
-            step = get_step(pipe_steps, step_order, which="prev", ignore=None)
-            cur_anat = skullstrip(pipe_steps["BASELINE"]["anat"], input["OUTPUT"])
-            pipe_steps["SKULLSTRIP"] = {"anat":cur_anat, "func":pipe_steps["BASELINE"]["anat"]}
-        
-        elif step_key=="SLICETIME" and config["SLICETIME"]=="1":
-            print("SLICETIME CORRECTION")
-
-            step = get_step(pipe_steps, step_order, which="prev", ignore=None)
-            cur_func = slicetime(cur_func, input["OUTPUT"])
-            pipe_steps["SLICETIME"] = {"anat":pipe_steps[step]["anat"], "func":cur_func}
-        
-        elif step_key=="MOTCOR" and config["MOTCOR"]=="1":
-            print("MOTION CORRECTION")
-
-            step = get_step(pipe_steps, step_order, which="prev", ignore=None)
-            cur_func, _1dfile_path=motcor(pipe_steps[step]["func"], input["OUTPUT"])
-            pipe_steps["MOTCOR"] = {"anat":pipe_steps[step]["anat"], "func":cur_func, "mot_estim":_1dfile_path}
-        
-        elif step_key=="NORM" and config["NORM"]=="1":
-            print("SPATIAL NORMALIZATION")
-
-            step = get_step(pipe_steps, step_order, which="prev", ignore=None)
-            cur_anat, cur_func, nl_warp, nl_premat = spatnorm(pipe_steps[step]["func"], pipe_steps[step]["anat"], config["TEMPLATE"], input["OUTPUT"])        
-            pipe_steps["NORM"]={"anat":cur_anat, "func":cur_func, "nl_warp":nl_warp, "nl_premat":nl_premat}
-        
-        elif step_key=="NUISANCE" and config["NUISANCE"]!="0":
-            print("NUISANCE SIGNAL REGRESSION")
-            
-            step = get_step(pipe_steps, step_order, which="prev", ignore=None)
-            nuis_path=os.path.join(input["OUTPUT"], "motion", "nuisance_regressors.1D")
-
-            if config["GSR"]=="1":
-                print("       + Global Signal Regression...")
-                
-                step = get_step(pipe_steps, step_order, which="prev", ignore=None)
-                csf_mask=segment(pipe_steps[step]["anat"], os.path.join(input["OUTPUT"], "anat", "segment")) + "_pve_0.nii.gz"
-                bin_csf_mask=bin_mask(csf_mask, 0.75)
-                
-                gs_tcourse_path=os.path.join(input["OUTPUT"], "motion", "global_signal.1D")
-                gs_tcourse=roi_tcourse(pipe_steps[step]["func"], bin_csf_mask, gs_tcourse_path)
-            else:
-                gs_tcourse=None
-                bin_csf_mask=None
-
-            if config["MOTREG"]=="1":
-                print("       + Motion Parameter Regression...")
-                mot_tcourse=pipe_steps["MOTCOR"]["mot_estim"]
-            else:
-                mot_tcourse=None
-
-            if mot_tcourse is None and gs_tcourse is None:
-                raise ValueError("Must enable at least one of the following to perform nuisance regression: MOTCOR, GSR")
-            
-            nuis_tab=combine_nuis(mot_tcourse, gs_tcourse, nuis_path)
-            cur_func=nuis_reg(pipe_steps[step]["func"], nuis_tab, os.path.join(input["OUTPUT"],"func"), pref="nuis",poly=config["NUISANCE"])
-
-            pipe_steps["NUISANCE"]={"anat":pipe_steps[step]["anat"], "func":cur_func, "csf_mask":bin_csf_mask, "gsr":gs_tcourse, "mot_reg":mot_tcourse, "nuis_reg":nuis_tab}    
-
-        elif step_key=="SMOOTH" and float(config["SMOOTH"]) > 0:
-            print("SPATIAL SMOOTHING")
-
-            step = get_step(pipe_steps, step_order, which="prev", ignore=None)
-            cur_func=spat_smooth(pipe_steps[step]["func"], float(config["SMOOTH"]), os.path.join(input["OUTPUT"], "func"))
-            pipe_steps["SMOOTH"] = {"anat":pipe_steps[step]["anat"], "func":cur_func}
-        
-        elif step_key=="SCRUB" and config["SCRUB"]!="NONE":
-            print("SCRUBBING fMRI TIME SERIES")
-            step = get_step(pipe_steps, step_order, which="prev", ignore=None)
-
-            if config["SCRUB"] in ["UNION", "INTERSECT", "FD"]:
-                print("       + Frame-wise Displacement...")
-                fd_outliers = fd_out(img=pipe_steps["BASELINE"]["func"], voxel_size=sum(voxel_sz)/len(voxel_sz), outdir=os.path.join(input["OUTPUT"], "motion"))
-            else:
-                fd_outliers = None
-
-            if config["SCRUB"] in ["UNION", "INTERSECT", "DVARS"]:
-                print("       + DVARS...")
-                nomoco = config["MOTCOR"]=="1"
-                if nomoco:
-                    cur_func=pipe_steps["MOTCOR"]["func"]
-                else:
-                    cur_func=pipe_steps["BASELINE"]["func"]
-                dvar_outliers = meantsBOLD(cur_func, os.path.join(input["OUTPUT"], "motion"), nomoco)
-            else:
-                dvar_outliers = None
-
-            scrub_outliers = mk_outliers(dvar_outliers, fd_outliers, os.path.join(input["OUTPUT"], "motion"), method=config["SCRUB"])
-            scrubbed_nifti = scrubbing(pipe_steps[step]["func"], scrub_outliers, os.path.join(input["OUTPUT"], "func"), interpolate=True)
-
-            pipe_steps["SCRUB"] = {"anat":pipe_steps[step]["anat"], "func":scrubbed_nifti, "scrub_outliers":scrub_outliers, "fd":fd_outliers, "dvars":dvar_outliers, "method":config["SCRUB"]}
-
-    return 
+    return
