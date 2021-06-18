@@ -1,13 +1,11 @@
 import os
-import gzip
-import shutil
 import pickle
 import decimal
 import pathlib
 import numpy as np
 import pandas as pd
 import nibabel as nib
-import preproc_obj as ppo
+import Preproc_subj as ppo
 from time import sleep
 
 # Config Defaults
@@ -188,8 +186,7 @@ def brainroi(img, out_dir):
     return(roi_img)
 
 def skullstrip(img, out_dir):
-    out_dir  = os.path.join(out_dir, "anat")
-    out_file = "brain_" + rm_ext(img)
+    out_file = "brain_" + os.path.basename(img)
     skullstr = os.path.join(out_dir, out_file)
 
     command="bet {} {} -R".format(img, skullstr)
@@ -199,7 +196,7 @@ def skullstrip(img, out_dir):
 
 def slicetime(img, out_dir):
     tr=getTR(img)
-    tshift_path=os.path.join(out_dir, "func", "t_" + rm_ext(img)+".nii.gz")
+    tshift_path=os.path.join(out_dir, "t_" + rm_ext(img)+".nii.gz")
     
     command="3dTshift -TR {}s -prefix {} {}".format(tr, tshift_path, img)
     os.system(command)
@@ -208,7 +205,7 @@ def slicetime(img, out_dir):
 
 def motcor(img, func_dir, motion_dir):
     motcor_path =os.path.join(func_dir, "m_"+os.path.basename(img))
-    _1dfile_path=os.path.join(motion_dir, "motion", "1d_"+rm_ext(os.path.basename(img))+".1D")
+    _1dfile_path=os.path.join(motion_dir, "1d_"+rm_ext(os.path.basename(img))+".1D")
 
     command="3dvolreg -base 0 -prefix {} -1Dfile {} {}".format(motcor_path, _1dfile_path, img)
     os.system(command)
@@ -261,14 +258,11 @@ def applywarp(in_img, out_img, ref_img, warp_img, premat):
     os.system("fnirt --ref={} --in={} --aff={} --iout={} --cout={} --subsamp=2,2,2,1".format(ref_img, in_img, premat, out_img, warp_img))
     return(out_img)
 
-def segment(img, out_dir=None):
-    if out_dir is None:
-        out_dir = os.path.dirname(img)
-    seg_path = os.path.join(out_dir, "seg")
-    command="fast -n 3 -t 1 -o '{}' '{}'".format(seg_path, img)
+def segment(img, out_dir):
+    command="fast -n 3 -t 1 -o '{}' '{}'".format(os.path.join(out_dir,"seg"), img)
     os.system(command)
 
-    return(seg_path)
+    return(os.path.join(out_dir, "seg_pve_0.nii.gz"))
 
 def bin_mask(mask, thr=0.5):
     output = os.path.join(os.path.dirname(mask), "bin_"+os.path.basename(mask))
@@ -362,7 +356,7 @@ def fd_out(img, voxel_size, outdir):
     command = "fsl_motion_outliers -i {} -o {} -s {} -p {} --fd --thresh={}".format(img, out_compound, fd_txt, fd_png, thresh)
     os.system(command)
 
-    sleep(10)
+    sleep(5)
     if not os.path.exists(out_compound):
         nlines=file_len(fd_txt)
         fd_compound=np.zeros([nlines,1], dtype=int)
@@ -402,7 +396,6 @@ def mk_outliers(dvars, fd, out_dir, method="UNION"):
 def interp_time(img, out, int_ind):
     if len(img.shape)!=4:
         raise Exception("Nifti image must have 4 dimensions.")
-    
     
     # make blank image
     int_dim = list(img.shape[0:3])
